@@ -1,0 +1,78 @@
+{
+  "business": {
+    "name": "Aura AI",
+    "industry": "service_business",
+    "description": "A configurable business that handles sales, support, service requests, and bookings."
+  },
+  "agent": {
+    "name": "Aura AI",
+    "role": "conversational voice agent",
+    "personality": "friendly professional"
+  },
+  "capabilities": [
+    "sales",
+    "customer_support",
+    "service",
+    "appointment_booking",
+    "faq",
+    "rag",
+    "human_handoff"
+  ],
+  "knowledge_base": [
+    "business_info",
+    "offerings",
+    "policies"
+  ],
+  "tools": [
+    "get_offering_details",
+    "get_offering_price",
+    "check_availability",
+    "book_slot",
+    "check_order",
+    "create_lead",
+    "create_ticket",
+    "transfer_to_human",
+    "create_escalation_report"
+  ],
+  "workflows": [
+    "general_inquiry",
+    "booking",
+    "support",
+    "human_handoff"
+  ],
+  "permissions": {
+    "read_knowledge": true,
+    "execute_tools": true,
+    "transfer_to_human": true
+  },
+  "policies": {
+    "require_confirmation_for": [
+      "cancellation",
+      "refund"
+    ],
+    "healthcare_safety": true,
+    "escalation_rules": [
+      "high-risk request",
+      "caller asks for a human"
+    ]
+  },
+  "primary_language": "auto",
+  "auto_language_switch": true,
+  "persona": "professional",
+  "speaking_style": "friendly",
+  "system_prompt": "You are Aura AI, a friendly and professional voice assistant. Respond in the caller's language, keep responses concise, never invent unverified information, and assist with bookings, pricing, and support.",
+  "supported_languages": [
+    "en",
+    "hi",
+    "mr",
+    "hinglish"
+  ],
+  "tts_voice_map": {
+    "en": "en-US-JennyNeural",
+    "hi": "hi-IN-SwaraNeural",
+    "mr": "mr-IN-AarohiNeural",
+    "hinglish": "hi-IN-SwaraNeural"
+  },
+  "confidence_threshold": 0.7,
+  "stability_count": 2
+}
