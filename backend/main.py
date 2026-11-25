@@ -52,6 +52,7 @@ async def on_shutdown():
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -72,6 +73,7 @@ app.include_router(escalations_router, prefix="/api/escalations", tags=["Escalat
 app.include_router(records_router, prefix="/api/records", tags=["Records"])
 
 
+@app.api_route("/", methods=["GET", "HEAD"])
 @app.get("/health")
 async def health_check():
     return {
