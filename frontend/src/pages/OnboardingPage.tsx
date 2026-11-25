@@ -10,8 +10,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
-
-const API = 'http://localhost:8000';
+import { API_BASE_URL as API } from '../utils/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

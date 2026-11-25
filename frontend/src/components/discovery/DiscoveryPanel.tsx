@@ -8,8 +8,7 @@
  * Only shows real published providers from the DB — no fake data.
  */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-
-const API = 'http://localhost:8000';
+import { API_BASE_URL as API } from '../../utils/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

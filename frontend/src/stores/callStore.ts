@@ -5,6 +5,7 @@ import {
   startVoiceRecording, stopVoiceRecording, enqueueSynthesizedAudio, stopSynthesizedAudioPlayback,
   releaseMicStream,
 } from '../utils/audioManager';
+import { WS_BASE_URL } from '../utils/api';
 
 export type VoicePipeline = 'browser' | 'server';
 export type SpeakingStyle = 'friendly' | 'professional' | 'empathetic';
@@ -65,8 +66,7 @@ interface CallState {
   clearEscalationAlert: () => void;
 }
 
-const configuredApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const configuredWsUrl = import.meta.env.VITE_WS_URL || configuredApiUrl.replace(/^http/, 'ws');
+const configuredWsUrl = WS_BASE_URL;
 
 // Module-level WebSocket and SpeechRecognition references
 let socket: WebSocket | null = null;

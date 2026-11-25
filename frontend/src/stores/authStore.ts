@@ -5,8 +5,7 @@
  * and auto-restoring session on app boot via /api/auth/me.
  */
 import { create } from 'zustand';
-
-const API = 'http://localhost:8000';
+import { API_BASE_URL as API } from '../utils/api';
 
 export type UserRole = 'admin' | 'customer';
 
