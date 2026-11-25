@@ -29,18 +29,18 @@ class Settings(BaseSettings):
     DATABASE_URL: str = ""
 
     # LLM Provider Configuration
-    LLM_PRIMARY: str = "ollama"  # "ollama" | "gemini"
-    LLM_SECONDARY: str = "gemini"  # "gemini" | "ollama" | "none"
+    LLM_PRIMARY: str = "gemini"  # "gemini" | "ollama"
+    LLM_SECONDARY: str = "ollama"  # "ollama" | "gemini" | "none"
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-flash-latest"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
 
     # Ollama (Local LLM)
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.2:3b"
-    OLLAMA_TIMEOUT: float = 30.0
+    OLLAMA_TIMEOUT: float = 15.0
 
     # STT (faster-whisper)
-    WHISPER_MODEL_SIZE: str = "base"
+    WHISPER_MODEL_SIZE: str = "tiny"
     WHISPER_DEVICE: str = "cpu"
     WHISPER_COMPUTE_TYPE: str = "int8"
 

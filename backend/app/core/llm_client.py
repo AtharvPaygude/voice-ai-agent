@@ -156,6 +156,16 @@ class LLMClient:
         self.gemini_key = (settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY") or "").strip()
         self.gemini_model = settings.GEMINI_MODEL
         self.history: Dict[str, List[Dict[str, Any]]] = {}
+        self._http_client: Optional[httpx.AsyncClient] = None
+        self._ollama_down_until: float = 0.0
+
+    def _get_client(self) -> httpx.AsyncClient:
+        if self._http_client is None or self._http_client.is_closed:
+            self._http_client = httpx.AsyncClient(
+                timeout=httpx.Timeout(15.0, connect=2.0),
+                limits=httpx.Limits(max_keepalive_connections=20, max_connections=50),
+            )
+        return self._http_client
 
     def get_history(self, call_id: str, system_prompt: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get or initialize conversation history for a call session."""
@@ -209,6 +219,9 @@ class LLMClient:
                     logger.warning(f"[LLM] Provider 'gemini' failed: {type(e).__name__}: {e}. Trying next provider.")
 
             elif provider == "ollama":
+                import time
+                if time.time() < self._ollama_down_until:
+                    continue
                 try:
                     async for token in self._stream_ollama(messages):
                         full_response += token
@@ -217,7 +230,8 @@ class LLMClient:
                         success = True
                         break
                 except Exception as e:
-                    logger.warning(f"[LLM] Provider 'ollama' failed: {type(e).__name__}: {e}. Trying next provider.")
+                    self._ollama_down_until = time.time() + 120.0
+                    logger.warning(f"[LLM] Provider 'ollama' failed: {type(e).__name__}: {e}. Circuit-breaking Ollama for 120s.")
 
         if not success:
             fallback = self._safe_fallback(user_message)
@@ -265,31 +279,31 @@ class LLMClient:
         if system_instruction:
             payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
-        models_to_try = [self.gemini_model, "gemini-1.5-flash", "gemini-1.5-pro"]
+        models_to_try = list(dict.fromkeys([self.gemini_model, "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash"]))
+        client = self._get_client()
         for model in models_to_try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={self.gemini_key}&alt=sse"
             try:
-                async with httpx.AsyncClient(timeout=15.0) as client:
-                    async with client.stream("POST", url, json=payload) as response:
-                        if response.status_code != 200:
-                            continue
-                        async for line in response.aiter_lines():
-                            if line.startswith("data: "):
-                                data_str = line[6:].strip()
-                                if data_str == "[DONE]":
-                                    break
-                                try:
-                                    data = json.loads(data_str)
-                                    candidates = data.get("candidates", [])
-                                    if candidates:
-                                        parts = candidates[0].get("content", {}).get("parts", [])
-                                        for part in parts:
-                                            text_token = part.get("text", "")
-                                            if text_token:
-                                                yield text_token
-                                except Exception:
-                                    pass
-                        return
+                async with client.stream("POST", url, json=payload) as response:
+                    if response.status_code != 200:
+                        continue
+                    async for line in response.aiter_lines():
+                        if line.startswith("data: "):
+                            data_str = line[6:].strip()
+                            if data_str == "[DONE]":
+                                break
+                            try:
+                                data = json.loads(data_str)
+                                candidates = data.get("candidates", [])
+                                if candidates:
+                                    parts = candidates[0].get("content", {}).get("parts", [])
+                                    for part in parts:
+                                        text_token = part.get("text", "")
+                                        if text_token:
+                                            yield text_token
+                            except Exception:
+                                pass
+                    return
             except Exception as e:
                 logger.warning(f"Gemini stream model {model} error: {e}")
                 continue

@@ -126,8 +126,12 @@ def transcribe_audio_bytes(
         segments, info = model.transcribe(
             tmp.name,
             language=whisper_lang,
+            beam_size=1,
+            best_of=1,
+            condition_on_previous_text=False,
+            without_timestamps=True,
             vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=400),
+            vad_parameters=dict(min_silence_duration_ms=300),
         )
         text = " ".join(seg.text.strip() for seg in segments).strip()
         detected_lang = (

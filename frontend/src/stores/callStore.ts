@@ -101,7 +101,7 @@ const maybeResumeListening = () => {
         startBrowserListening();
       }
     }
-  }, 500);
+  }, 150);
 };
 
 const onQueueDrained = () => {
@@ -128,13 +128,13 @@ const getAdaptiveSilenceDuration = () => {
   const trimmed = lastKnownUtteranceText.trim();
   // Quick end for clearly finished questions or sentences
   if (trimmed.endsWith('?') || trimmed.endsWith('.') || trimmed.endsWith('!')) {
-    return 600;
+    return 400;
   }
   // Longer wait if ends with trailing words, comma, or ellipsis
   if (trimmed.endsWith(',') || trimmed.endsWith('...') || / (um|uh|and|or|so|but)$/i.test(trimmed)) {
-    return 1200;
+    return 850;
   }
-  return 850;
+  return 550;
 };
 
 const clearSilenceTimer = () => {
