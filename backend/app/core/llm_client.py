@@ -279,13 +279,15 @@ class LLMClient:
         if system_instruction:
             payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
-        models_to_try = list(dict.fromkeys([self.gemini_model, "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash"]))
+        models_to_try = list(dict.fromkeys([self.gemini_model, "gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.1-flash-lite-preview"]))
         client = self._get_client()
         for model in models_to_try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={self.gemini_key}&alt=sse"
             try:
                 async with client.stream("POST", url, json=payload) as response:
                     if response.status_code != 200:
+                        err_body = (await response.aread()).decode("utf-8", errors="ignore")[:200]
+                        logger.warning(f"Gemini model {model} returned HTTP {response.status_code}: {err_body}")
                         continue
                     async for line in response.aiter_lines():
                         if line.startswith("data: "):
@@ -372,6 +374,18 @@ class LLMClient:
             return (
                 "If you are facing a medical emergency, please dial 112 immediately. "
                 "I can also connect you to our on-call clinic staff right now."
+            )
+
+        if any(w in msg for w in ("book", "appointment", "slot", "doctor", "schedule", "available", "availability")):
+            return (
+                "I would be happy to help you with a booking! Let me check our current availability for you. "
+                ':::TOOL_CALL::: {"tool": "check_availability", "parameters": {}} :::END_TOOL_CALL:::'
+            )
+
+        if any(w in msg for w in ("service", "services", "menu", "room", "rooms", "offering", "list")):
+            return (
+                "Let me pull up our current services and offerings for you. "
+                ':::TOOL_CALL::: {"tool": "get_offering_details", "parameters": {}} :::END_TOOL_CALL:::'
             )
 
         return (

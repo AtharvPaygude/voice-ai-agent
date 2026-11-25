@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     LLM_PRIMARY: str = "gemini"  # "gemini" | "ollama"
     LLM_SECONDARY: str = "ollama"  # "ollama" | "gemini" | "none"
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.0-flash"
+    GEMINI_MODEL: str = "gemini-flash-lite-latest"
 
     # Ollama (Local LLM)
     OLLAMA_BASE_URL: str = "http://localhost:11434"
